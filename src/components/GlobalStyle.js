@@ -9,7 +9,8 @@ export default createGlobalStyle`
     }
 
     body,
-    html {
+    html,
+    #root {
         height: 100%;
         margin: 0;
     }

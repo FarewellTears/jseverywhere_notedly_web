@@ -1,5 +1,7 @@
+import React from "react";
 import { useQuery, gql } from "@apollo/client";
 
+import NoteFeed from "../components/NoteFeed";
 import Button from "../components/Button";
 
 // 把 GraphQL 查询存储为一个变量
@@ -33,12 +35,36 @@ const Home = () => {
 
   // 成功获取数据后在 UI 中显示出来
   return (
-    <div>
-      {data.noteFeed.notes.map((note) => (
-        <div key={note.id}>{note.author.username}</div>
-      ))}
-      <Button>Click</Button>
-    </div>
+    <React.Fragment>
+      <NoteFeed notes={data.noteFeed.notes} />
+      {/* 仅当 hasNextPage 为 true 时显示 Load more 按钮 */}
+      {data.noteFeed.hasNextPage && (
+        <Button
+          onClick={() => {
+            fetchMore({
+              variables: {
+                cursor: data.noteFeed.cursor,
+              },
+              updateQuery: (previousResult, { fetchMoreResult }) => {
+                return {
+                  noteFeed: {
+                    cursor: fetchMoreResult.noteFeed.cursor,
+                    hasNextPage: fetchMoreResult.noteFeed.hasNextPage,
+                    notes: [
+                      ...previousResult.noteFeed.notes,
+                      ...fetchMoreResult.noteFeed.notes,
+                    ],
+                    __typename: "noteFeed",
+                  },
+                };
+              },
+            });
+          }}
+        >
+          Load more
+        </Button>
+      )}
+    </React.Fragment>
   );
 };
 
